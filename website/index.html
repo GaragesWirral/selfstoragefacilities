@@ -27,17 +27,21 @@
         <div class="container">
             <h1>Find Self Storage Near Me</h1>
             <p>Compare the best self storage facilities in your area. Find secure, affordable storage solutions for your belongings.</p>
+            <div class="search-form">
+                <input type="text" id="locationSearch" placeholder="Search for a location...">
+                <select id="radius">
+                    <option value="5">5 miles</option>
+                    <option value="10" selected>10 miles</option>
+                    <option value="15">15 miles</option>
+                    <option value="20">20 miles</option>
+                </select>
+                <button onclick="searchLocation()">Search</button>
+            </div>
             <a href="regions.html" class="btn">Browse by Region</a>
         </div>
     </section>
     
     <div class="container">
-        <h2>Search for Self Storage</h2>
-        <div class="search-form">
-            <input type="text" id="locationSearch" placeholder="Enter your city or region...">
-            <button onclick="searchLocation()">Find Storage</button>
-        </div>
-        
         <h2>Popular Storage Regions</h2>
         <div class="regions-list">
 
@@ -175,13 +179,15 @@
     <script>
         function searchLocation() {
             const input = document.getElementById('locationSearch').value.toLowerCase();
+            const radius = document.getElementById('radius').value;
+            
             if (input.trim() === '') {
                 alert('Please enter a location to search');
                 return;
             }
             
-            // Redirect to regions page with search parameter
-            window.location.href = 'regions.html?search=' + encodeURIComponent(input);
+            // Redirect to regions page with search parameter and radius
+            window.location.href = 'regions.html?search=' + encodeURIComponent(input) + '&radius=' + radius;
         }
     </script>
 </body>

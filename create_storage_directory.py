@@ -3,6 +3,35 @@ import os
 import re
 from collections import defaultdict
 
+# Function to generate facility cards with modern styling
+def generate_facility_card(facility):
+    facility_name = facility['name']
+    location = facility.get('location', 'Address not available').replace('\n', '<br>')
+    phone = facility.get('phone', 'Not available')
+    email = facility.get('email', 'Not available')
+    website = facility.get('website', '')
+    
+    website_display = ''
+    if website and website != 'Not available':
+        website_display = f'<p><strong>Website:</strong> {website}</p>'
+    
+    return f"""
+            <div class="storage-card">
+                <h3>{facility_name}</h3>
+                <div class="storage-info">
+                    <p><strong>Location:</strong> {location}</p>
+                </div>
+                <div class="contact-info">
+                    <p><strong>Phone:</strong> {phone}</p>
+                    <p><strong>Email:</strong> {email}</p>
+                    {website_display}
+                </div>
+            </div>"""
+
+# Create the website directory
+website_dir = 'website'
+os.makedirs(website_dir, exist_ok=True)
+
 # Read the Excel file
 df = pd.read_excel('self storage facilities uk.xlsx')
 
@@ -19,17 +48,20 @@ if not os.path.exists('website'):
     os.makedirs('website/assets/js')
 
 # Create CSS file
-css_content = """
+css_content = """/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* General Styles */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
 }
 
 body {
-    background-color: #f8f9fa;
-    color: #333;
+    background-color: #F8F9FA;
+    color: #333333;
     line-height: 1.6;
 }
 
@@ -39,11 +71,35 @@ body {
     padding: 20px;
 }
 
+h1 {
+    font-size: 32px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+p {
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+/* Header Styles */
 header {
-    background-color: #0d6efd;
+    background-color: #006400;
     color: white;
-    padding: 20px 0;
-    margin-bottom: 30px;
+    padding: 15px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 header .container {
@@ -69,17 +125,20 @@ nav ul li {
 nav ul li a {
     color: white;
     text-decoration: none;
+    transition: opacity 0.3s;
 }
 
-h1, h2, h3 {
-    margin-bottom: 15px;
+nav ul li a:hover {
+    opacity: 0.8;
 }
 
+/* Hero Section */
 .hero {
-    background-color: #e9ecef;
-    padding: 60px 0;
+    background-color: #F8F9FA;
+    padding: 50px 0;
     text-align: center;
     margin-bottom: 40px;
+    border-bottom: 1px solid #e9ecef;
 }
 
 .hero h1 {
@@ -93,53 +152,97 @@ h1, h2, h3 {
     margin: 0 auto 30px;
 }
 
+/* Button Styles */
 .btn {
     display: inline-block;
-    background-color: #0d6efd;
+    background-color: #28A745;
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 500;
+    transition: background-color 0.3s;
 }
 
+.btn:hover {
+    background-color: #218838;
+}
+
+/* Search Form */
 .search-form {
     margin-bottom: 30px;
     text-align: center;
 }
 
 .search-form input {
-    padding: 10px;
+    padding: 12px;
     width: 300px;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    font-size: 16px;
+}
+
+.search-form select {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 0 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    font-size: 16px;
 }
 
 .search-form button {
-    padding: 10px 20px;
-    background-color: #0d6efd;
+    padding: 12px 25px;
+    background-color: #28A745;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+    font-size: 16px;
 }
 
+.search-form button:hover {
+    background-color: #218838;
+}
+
+/* Regions List */
 .regions-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     margin-bottom: 40px;
 }
 
+/* Region Card */
 .region-card {
     background-color: white;
-    border-radius: 5px;
-    padding: 20px;
+    border: 1px solid #28A745;
+    border-radius: 8px;
+    padding: 15px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.region-card:hover {
+    transform: scale(1.05);
 }
 
 .region-card h3 {
+    color: #333333;
     margin-bottom: 10px;
+}
+
+.region-card p {
+    margin-bottom: 15px;
+    color: #666;
+}
+
+.region-card .btn {
+    display: block;
+    text-align: center;
 }
 
 .region-card ul {
@@ -152,26 +255,29 @@ h1, h2, h3 {
 }
 
 .region-card ul li a {
-    color: #0d6efd;
+    color: #006400;
     text-decoration: none;
 }
 
+/* Storage List */
 .storage-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 20px;
     margin-top: 30px;
 }
 
+/* Storage Card */
 .storage-card {
     background-color: white;
+    border: 1px solid #28A745;
     border-radius: 5px;
-    padding: 20px;
+    padding: 15px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .storage-card h3 {
-    color: #0d6efd;
+    color: #333333;
     margin-bottom: 10px;
 }
 
@@ -180,20 +286,27 @@ h1, h2, h3 {
 }
 
 .contact-info a {
-    color: #0d6efd;
+    color: #006400;
     text-decoration: none;
+    transition: color 0.3s;
 }
 
+.contact-info a:hover {
+    color: #004d00;
+}
+
+/* Footer */
 footer {
-    background-color: #343a40;
+    background-color: #006400;
     color: white;
     padding: 40px 0 20px;
     margin-top: 40px;
 }
 
 .footer-columns {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
     gap: 30px;
     margin-bottom: 20px;
 }
@@ -229,10 +342,33 @@ footer {
     text-align: center;
 }
 
+/* Responsive Styles */
 @media (max-width: 768px) {
-    .footer-columns {
+    .regions-list {
         grid-template-columns: 1fr;
+    }
+    
+    header .container {
+        flex-direction: column;
+    }
+    
+    nav ul {
+        margin-top: 15px;
+    }
+    
+    .footer-columns {
+        flex-direction: column;
         gap: 20px;
+    }
+    
+    .search-form input,
+    .search-form select {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .search-form button {
+        width: 100%;
     }
 }
 """
@@ -339,6 +475,7 @@ for region, cities in region_data.items():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
     <title>Self Storage in {city}, {region} | Storage Facilities Near Me</title>
     <meta name="description" content="Find the best self storage facilities in {city}, {region}. Compare prices and services from {len(storage_facilities)} local storage providers.">
     <link rel="stylesheet" href="../../assets/css/style.css">
@@ -369,28 +506,7 @@ for region, cities in region_data.items():
         
         # Add storage facilities to city page
         for facility in storage_facilities:
-            city_page += f"""
-            <div class="storage-card">
-                <h3>{facility['name']}</h3>
-                <div class="storage-info">
-                    <p><strong>Location:</strong> {facility['location']}</p>
-                </div>
-                <div class="contact-info">
-"""
-            
-            if facility['phone']:
-                city_page += f'                    <p><strong>Phone:</strong> {facility["phone"]}</p>\n'
-                
-            if facility['email']:
-                city_page += f'                    <p><strong>Contact:</strong> {facility["email"]}</p>\n'
-                
-            if facility['website']:
-                city_page += f'                    <p><strong>Website:</strong> {facility["website"]}</p>\n'
-                
-            city_page += """
-                </div>
-            </div>
-"""
+            city_page += generate_facility_card(facility)
         
         city_page += """
         </div>
@@ -522,21 +638,6 @@ regions_page = """<!DOCTYPE html>
     <meta name="description" content="Browse self storage facilities by region across the UK. Find the perfect storage solution in your area.">
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
-        .search-options {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .search-option {
-            background-color: #f0f0f0;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .search-option.active {
-            background-color: #0d6efd;
-            color: white;
-        }
         .search-container {
             margin-bottom: 30px;
         }
@@ -571,14 +672,15 @@ regions_page = """<!DOCTYPE html>
         <h1>Self Storage Regions</h1>
         <p>Browse self storage facilities by region to find the perfect storage solution near you.</p>
         
-        <div class="search-options">
-            <div class="search-option active" id="regionSearchTab" onclick="switchToRegionSearch()">Search by Region</div>
-            <div class="search-option" id="citySearchTab" onclick="switchToCitySearch()">Search by City</div>
-        </div>
-        
         <div id="regionSearchContainer" class="search-container">
             <div class="search-form">
-                <input type="text" id="regionSearch" placeholder="Search for a region...">
+                <input type="text" id="regionSearch" placeholder="Search for a location...">
+                <select id="radius">
+                    <option value="5">5 miles</option>
+                    <option value="10" selected>10 miles</option>
+                    <option value="15">15 miles</option>
+                    <option value="20">20 miles</option>
+                </select>
                 <button onclick="searchRegion()">Search</button>
             </div>
             
@@ -606,14 +708,7 @@ regions_page += """
             </div>
         </div>
         
-        <div id="citySearchContainer" class="search-container">
-            <div class="search-form">
-                <input type="text" id="allCitiesSearch" placeholder="Search for a city...">
-                <button onclick="searchAllCities()">Search</button>
-            </div>
-            
-            <h2 id="city-search-results-heading" style="display: none; margin-top: 30px;">City Search Results</h2>
-            
+        <div id="citySearchContainer" class="search-container" style="display:none;">
             <div id="cityList">
                 <!-- City cards will be generated here -->
             </div>
@@ -673,11 +768,48 @@ regions_page += """
         // Function to search regions
         function searchRegion() {
             const input = document.getElementById('regionSearch').value.toLowerCase();
+            const radius = document.getElementById('radius').value;
             const cards = document.querySelectorAll('.region-card');
+            
+            console.log('Searching with radius:', radius);
             
             // Show the search results heading
             document.getElementById('search-results-heading').style.display = 'block';
             
+            // First check if the input matches any cities
+            const matchingCities = allCities.filter(city => 
+                city.name.toLowerCase().includes(input)
+            );
+            
+            // If there's an exact match for a city, redirect to that city page
+            const exactMatch = matchingCities.find(city => city.name.toLowerCase() === input);
+            if (exactMatch) {
+                window.location.href = exactMatch.url;
+                return;
+            }
+            
+            // If there are city matches but no exact match, display city results
+            if (matchingCities.length > 0) {
+                document.getElementById('regionSearchContainer').style.display = 'none';
+                document.getElementById('citySearchContainer').style.display = 'block';
+                
+                const cityListContainer = document.getElementById('cityList');
+                cityListContainer.innerHTML = '';
+                
+                matchingCities.forEach(city => {
+                    const cityCard = document.createElement('div');
+                    cityCard.className = 'region-card';
+                    cityCard.innerHTML = `
+                        <h3>${city.name}</h3>
+                        <p>${city.region}</p>
+                        <a href="${city.url}" class="btn">View Storage</a>
+                    `;
+                    cityListContainer.appendChild(cityCard);
+                });
+                return;
+            }
+            
+            // Otherwise, search for regions
             let anyMatch = false;
             cards.forEach(card => {
                 const regionName = card.querySelector('h3').textContent.toLowerCase();
@@ -695,109 +827,22 @@ regions_page += """
             }
         }
         
-        // Function to search all cities
-        function searchAllCities() {
-            const input = document.getElementById('allCitiesSearch').value.toLowerCase();
-            const cityListContainer = document.getElementById('cityList');
-            
-            // Clear previous results
-            cityListContainer.innerHTML = '';
-            
-            // Show the search results heading
-            document.getElementById('city-search-results-heading').style.display = 'block';
-            
-            // Filter cities based on input
-            const matchingCities = allCities.filter(city => 
-                city.name.toLowerCase().includes(input)
-            );
-            
-            // If no matches, show a message
-            if (matchingCities.length === 0) {
-                cityListContainer.innerHTML = '<p>No cities found matching your search. Try a different term.</p>';
-                return;
-            }
-            
-            // Check for exact match - if found, redirect
-            const exactMatch = matchingCities.find(city => city.name.toLowerCase() === input);
-            if (exactMatch) {
-                window.location.href = exactMatch.url;
-                return;
-            }
-            
-            // Display matching cities
-            matchingCities.forEach(city => {
-                const cityCard = document.createElement('div');
-                cityCard.className = 'region-card';
-                cityCard.innerHTML = `
-                    <h3>${city.name}</h3>
-                    <p>${city.region}</p>
-                    <a href="${city.url}" class="btn">View Storage</a>
-                `;
-                cityListContainer.appendChild(cityCard);
-            });
-        }
-        
-        // Function to switch to region search
-        function switchToRegionSearch() {
-            document.getElementById('regionSearchTab').classList.add('active');
-            document.getElementById('citySearchTab').classList.remove('active');
-            document.getElementById('regionSearchContainer').style.display = 'block';
-            document.getElementById('citySearchContainer').style.display = 'none';
-        }
-        
-        // Function to switch to city search
-        function switchToCitySearch() {
-            document.getElementById('regionSearchTab').classList.remove('active');
-            document.getElementById('citySearchTab').classList.add('active');
-            document.getElementById('regionSearchContainer').style.display = 'none';
-            document.getElementById('citySearchContainer').style.display = 'block';
-            
-            // If city list is empty, show all cities initially
-            if (document.getElementById('cityList').innerHTML === '') {
-                const cityListContainer = document.getElementById('cityList');
-                
-                // Get a sample of cities (first 30) to show initially
-                const sampleCities = allCities.slice(0, 30);
-                
-                sampleCities.forEach(city => {
-                    const cityCard = document.createElement('div');
-                    cityCard.className = 'region-card';
-                    cityCard.innerHTML = `
-                        <h3>${city.name}</h3>
-                        <p>${city.region}</p>
-                        <a href="${city.url}" class="btn">View Storage</a>
-                    `;
-                    cityListContainer.appendChild(cityCard);
-                });
-            }
-        }
-        
-        // Check if there's a search parameter and which tab to activate
+        // Check if there's a search parameter
         document.addEventListener('DOMContentLoaded', function() {
             const searchParams = new URLSearchParams(window.location.search);
             if (searchParams.has('search')) {
                 const searchTerm = searchParams.get('search');
+                const radius = searchParams.has('radius') ? searchParams.get('radius') : '10';
                 
-                // Check if the search term is more likely to be a city
-                const cityMatches = allCities.filter(city => 
-                    city.name.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-                
-                if (cityMatches.length > 0) {
-                    // Switch to city search tab
-                    switchToCitySearch();
-                    // Set the search term in the city search input
-                    document.getElementById('allCitiesSearch').value = searchTerm;
-                    // Execute the city search
-                    searchAllCities();
-                } else {
-                    // Default to region search
-                    switchToRegionSearch();
-                    // Set the search term in the region search input
-                    document.getElementById('regionSearch').value = searchTerm;
-                    // Execute the region search
-                    searchRegion();
+                // Set radius dropdown if it exists
+                if (document.getElementById('radius')) {
+                    document.getElementById('radius').value = radius;
                 }
+                
+                // Set the search term in the region search input
+                document.getElementById('regionSearch').value = searchTerm;
+                // Execute the search
+                searchRegion();
             }
         });
     </script>
@@ -839,17 +884,21 @@ homepage = """<!DOCTYPE html>
         <div class="container">
             <h1>Find Self Storage Near Me</h1>
             <p>Compare the best self storage facilities in your area. Find secure, affordable storage solutions for your belongings.</p>
+            <div class="search-form">
+                <input type="text" id="locationSearch" placeholder="Search for a location...">
+                <select id="radius">
+                    <option value="5">5 miles</option>
+                    <option value="10" selected>10 miles</option>
+                    <option value="15">15 miles</option>
+                    <option value="20">20 miles</option>
+                </select>
+                <button onclick="searchLocation()">Search</button>
+            </div>
             <a href="regions.html" class="btn">Browse by Region</a>
         </div>
     </section>
     
     <div class="container">
-        <h2>Search for Self Storage</h2>
-        <div class="search-form">
-            <input type="text" id="locationSearch" placeholder="Enter your city or region...">
-            <button onclick="searchLocation()">Find Storage</button>
-        </div>
-        
         <h2>Popular Storage Regions</h2>
         <div class="regions-list">
 """
@@ -934,13 +983,15 @@ homepage += """
     <script>
         function searchLocation() {
             const input = document.getElementById('locationSearch').value.toLowerCase();
+            const radius = document.getElementById('radius').value;
+            
             if (input.trim() === '') {
                 alert('Please enter a location to search');
                 return;
             }
             
-            // Redirect to regions page with search parameter
-            window.location.href = 'regions.html?search=' + encodeURIComponent(input);
+            // Redirect to regions page with search parameter and radius
+            window.location.href = 'regions.html?search=' + encodeURIComponent(input) + '&radius=' + radius;
         }
     </script>
 </body>
@@ -1112,7 +1163,7 @@ faq_page = """<!DOCTYPE html>
             
             <div class="faq-item">
                 <h3>How much does it cost to rent a storage unit?</h3>
-                <p>Varies by size, location, and type; averages $114/month for a 10x10 non-climate-controlled unit.</p>
+                <p>Costs vary depending on size, location, and whether it's climate-controlled. In the UK, prices typically range from £10 to £30 per week for a small unit (around 25-50 square feet), averaging about £20 per week or £80-£100 per month for a standard non-climate-controlled unit. Larger units (e.g., 100 square feet) can cost £150-£300 per month, with higher rates in cities like London and lower rates in rural areas.</p>
             </div>
             
             <div class="faq-item">
@@ -1122,7 +1173,7 @@ faq_page = """<!DOCTYPE html>
             
             <div class="faq-item">
                 <h3>How do I know which size unit I need?</h3>
-                <p>Based on item volume; e.g., 5x5 for small items, 10x10 for a one-bedroom apartment. Visit to estimate.</p>
+                <p>The right size depends on the volume of items you're storing. For example, a 25 sq ft unit suits small items like a few boxes or a bicycle, while a 50 sq ft unit can hold the contents of a small flat (e.g., a bed, sofa, and some boxes). A 100 sq ft unit is ideal for a one- or two-bedroom home, including furniture and appliances. Visiting the facility can help you estimate the best fit for your needs.</p>
             </div>
             
             <div class="faq-item">

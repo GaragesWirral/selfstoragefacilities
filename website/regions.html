@@ -7,21 +7,6 @@
     <meta name="description" content="Browse self storage facilities by region across the UK. Find the perfect storage solution in your area.">
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
-        .search-options {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .search-option {
-            background-color: #f0f0f0;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .search-option.active {
-            background-color: #0d6efd;
-            color: white;
-        }
         .search-container {
             margin-bottom: 30px;
         }
@@ -56,14 +41,15 @@
         <h1>Self Storage Regions</h1>
         <p>Browse self storage facilities by region to find the perfect storage solution near you.</p>
         
-        <div class="search-options">
-            <div class="search-option active" id="regionSearchTab" onclick="switchToRegionSearch()">Search by Region</div>
-            <div class="search-option" id="citySearchTab" onclick="switchToCitySearch()">Search by City</div>
-        </div>
-        
         <div id="regionSearchContainer" class="search-container">
             <div class="search-form">
-                <input type="text" id="regionSearch" placeholder="Search for a region...">
+                <input type="text" id="regionSearch" placeholder="Search for a location...">
+                <select id="radius">
+                    <option value="5">5 miles</option>
+                    <option value="10" selected>10 miles</option>
+                    <option value="15">15 miles</option>
+                    <option value="20">20 miles</option>
+                </select>
                 <button onclick="searchRegion()">Search</button>
             </div>
             
@@ -548,14 +534,7 @@
             </div>
         </div>
         
-        <div id="citySearchContainer" class="search-container">
-            <div class="search-form">
-                <input type="text" id="allCitiesSearch" placeholder="Search for a city...">
-                <button onclick="searchAllCities()">Search</button>
-            </div>
-            
-            <h2 id="city-search-results-heading" style="display: none; margin-top: 30px;">City Search Results</h2>
-            
+        <div id="citySearchContainer" class="search-container" style="display:none;">
             <div id="cityList">
                 <!-- City cards will be generated here -->
             </div>
@@ -1866,11 +1845,48 @@
         // Function to search regions
         function searchRegion() {
             const input = document.getElementById('regionSearch').value.toLowerCase();
+            const radius = document.getElementById('radius').value;
             const cards = document.querySelectorAll('.region-card');
+            
+            console.log('Searching with radius:', radius);
             
             // Show the search results heading
             document.getElementById('search-results-heading').style.display = 'block';
             
+            // First check if the input matches any cities
+            const matchingCities = allCities.filter(city => 
+                city.name.toLowerCase().includes(input)
+            );
+            
+            // If there's an exact match for a city, redirect to that city page
+            const exactMatch = matchingCities.find(city => city.name.toLowerCase() === input);
+            if (exactMatch) {
+                window.location.href = exactMatch.url;
+                return;
+            }
+            
+            // If there are city matches but no exact match, display city results
+            if (matchingCities.length > 0) {
+                document.getElementById('regionSearchContainer').style.display = 'none';
+                document.getElementById('citySearchContainer').style.display = 'block';
+                
+                const cityListContainer = document.getElementById('cityList');
+                cityListContainer.innerHTML = '';
+                
+                matchingCities.forEach(city => {
+                    const cityCard = document.createElement('div');
+                    cityCard.className = 'region-card';
+                    cityCard.innerHTML = `
+                        <h3>${city.name}</h3>
+                        <p>${city.region}</p>
+                        <a href="${city.url}" class="btn">View Storage</a>
+                    `;
+                    cityListContainer.appendChild(cityCard);
+                });
+                return;
+            }
+            
+            // Otherwise, search for regions
             let anyMatch = false;
             cards.forEach(card => {
                 const regionName = card.querySelector('h3').textContent.toLowerCase();
@@ -1888,109 +1904,22 @@
             }
         }
         
-        // Function to search all cities
-        function searchAllCities() {
-            const input = document.getElementById('allCitiesSearch').value.toLowerCase();
-            const cityListContainer = document.getElementById('cityList');
-            
-            // Clear previous results
-            cityListContainer.innerHTML = '';
-            
-            // Show the search results heading
-            document.getElementById('city-search-results-heading').style.display = 'block';
-            
-            // Filter cities based on input
-            const matchingCities = allCities.filter(city => 
-                city.name.toLowerCase().includes(input)
-            );
-            
-            // If no matches, show a message
-            if (matchingCities.length === 0) {
-                cityListContainer.innerHTML = '<p>No cities found matching your search. Try a different term.</p>';
-                return;
-            }
-            
-            // Check for exact match - if found, redirect
-            const exactMatch = matchingCities.find(city => city.name.toLowerCase() === input);
-            if (exactMatch) {
-                window.location.href = exactMatch.url;
-                return;
-            }
-            
-            // Display matching cities
-            matchingCities.forEach(city => {
-                const cityCard = document.createElement('div');
-                cityCard.className = 'region-card';
-                cityCard.innerHTML = `
-                    <h3>${city.name}</h3>
-                    <p>${city.region}</p>
-                    <a href="${city.url}" class="btn">View Storage</a>
-                `;
-                cityListContainer.appendChild(cityCard);
-            });
-        }
-        
-        // Function to switch to region search
-        function switchToRegionSearch() {
-            document.getElementById('regionSearchTab').classList.add('active');
-            document.getElementById('citySearchTab').classList.remove('active');
-            document.getElementById('regionSearchContainer').style.display = 'block';
-            document.getElementById('citySearchContainer').style.display = 'none';
-        }
-        
-        // Function to switch to city search
-        function switchToCitySearch() {
-            document.getElementById('regionSearchTab').classList.remove('active');
-            document.getElementById('citySearchTab').classList.add('active');
-            document.getElementById('regionSearchContainer').style.display = 'none';
-            document.getElementById('citySearchContainer').style.display = 'block';
-            
-            // If city list is empty, show all cities initially
-            if (document.getElementById('cityList').innerHTML === '') {
-                const cityListContainer = document.getElementById('cityList');
-                
-                // Get a sample of cities (first 30) to show initially
-                const sampleCities = allCities.slice(0, 30);
-                
-                sampleCities.forEach(city => {
-                    const cityCard = document.createElement('div');
-                    cityCard.className = 'region-card';
-                    cityCard.innerHTML = `
-                        <h3>${city.name}</h3>
-                        <p>${city.region}</p>
-                        <a href="${city.url}" class="btn">View Storage</a>
-                    `;
-                    cityListContainer.appendChild(cityCard);
-                });
-            }
-        }
-        
-        // Check if there's a search parameter and which tab to activate
+        // Check if there's a search parameter
         document.addEventListener('DOMContentLoaded', function() {
             const searchParams = new URLSearchParams(window.location.search);
             if (searchParams.has('search')) {
                 const searchTerm = searchParams.get('search');
+                const radius = searchParams.has('radius') ? searchParams.get('radius') : '10';
                 
-                // Check if the search term is more likely to be a city
-                const cityMatches = allCities.filter(city => 
-                    city.name.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-                
-                if (cityMatches.length > 0) {
-                    // Switch to city search tab
-                    switchToCitySearch();
-                    // Set the search term in the city search input
-                    document.getElementById('allCitiesSearch').value = searchTerm;
-                    // Execute the city search
-                    searchAllCities();
-                } else {
-                    // Default to region search
-                    switchToRegionSearch();
-                    // Set the search term in the region search input
-                    document.getElementById('regionSearch').value = searchTerm;
-                    // Execute the region search
-                    searchRegion();
+                // Set radius dropdown if it exists
+                if (document.getElementById('radius')) {
+                    document.getElementById('radius').value = radius;
                 }
+                
+                // Set the search term in the region search input
+                document.getElementById('regionSearch').value = searchTerm;
+                // Execute the search
+                searchRegion();
             }
         });
     </script>
